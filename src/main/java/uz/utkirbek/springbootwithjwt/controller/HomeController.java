@@ -1,5 +1,7 @@
 package uz.utkirbek.springbootwithjwt.controller;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HomeController {
 
     @GetMapping
-    public String getHome(){
-        return "Welcome to home page";
+    public HttpEntity<?> getHome(){
+        return ResponseEntity.ok( "Welcome to home page");
     }
 }
