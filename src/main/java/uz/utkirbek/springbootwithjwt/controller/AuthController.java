@@ -1,9 +1,15 @@
 package uz.utkirbek.springbootwithjwt.controller;
 
+import com.sun.rmi.rmid.ExecPermission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,13 +31,21 @@ public class AuthController {
     JwtProvider jwtProvider;
     @Autowired
     AuthService authService;
+    @Autowired
+    PasswordEncoder passwordEncoder;
+    @Autowired
+    AuthenticationManager authenticationManager;
+
 
     @PostMapping("/login")
     public HttpEntity<?> login(@RequestBody LoginDto loginDto){
-        UserDetails userDetails=authService.loadUserByUsername(loginDto.getUsername());
-        if(userDetails.getPassword().equals(loginDto.getPassword())){
-            return ResponseEntity.ok(jwtProvider.generateToken(loginDto.getUsername()));
-        }
-        return ResponseEntity.status(401).body("Login or password is incorrect!");
+       try {
+           Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                   loginDto.getUsername(),
+                   loginDto.getPassword()));
+           return ResponseEntity.ok(jwtProvider.generateToken(loginDto.getUsername()));
+       }catch (BadCredentialsException e){
+           return ResponseEntity.status(401).body("Login or password is incorrect!");
+       }
     }
 }
